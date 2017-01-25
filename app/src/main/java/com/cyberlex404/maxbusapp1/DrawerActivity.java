@@ -126,6 +126,11 @@ public class DrawerActivity extends AppCompatActivity
         startActivity(intent);
     }
 
+    private void getTiketsByFligth(int fligth) {
+        //HttpClient httpClient = new DefaultHttpClient();
+
+    }
+
 
 
 }
