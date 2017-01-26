@@ -1,6 +1,7 @@
 package com.cyberlex404.maxbusapp1;
 
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -14,15 +15,27 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
+import com.cyberlex404.maxbusapp1.api.UmoriliApi;
 import com.cyberlex404.maxbusapp1.fragments.BusFragment;
 import com.cyberlex404.maxbusapp1.fragments.FligthsFragment;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     BusFragment busFragment;
     FligthsFragment fligthsFragment;
+    List<TicketsModel> tickets;
+    List<PostModel> post;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +50,11 @@ public class DrawerActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //getTiketsByFligth();
+                getPost();
+                /*
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                        .setAction("Action", null).show();*/
             }
         });
 
@@ -126,9 +142,46 @@ public class DrawerActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    private void getTiketsByFligth(int fligth) {
-        //HttpClient httpClient = new DefaultHttpClient();
+    private void getTiketsByFligth() {
+        int id = 6;
+        tickets = new ArrayList<>();
+        HttpApiClient.getApi().getTickets(id).enqueue(new Callback<List<TicketsModel>>() {
+            @Override
+            public void onResponse(Call<List<TicketsModel>> call, Response<List<TicketsModel>> response) {
+                //Данные успешно пришли, но надо проверить response.body() на null
+                if(response.body() != null){
+                    tickets.addAll(response.body());
+                    String p = tickets.get(1).getTelephone();
+                    Toast.makeText(DrawerActivity.this, p, Toast.LENGTH_SHORT).show();
+                }
 
+            }
+            @Override
+            public void onFailure(Call<List<TicketsModel>> call, Throwable t) {
+                Toast.makeText(DrawerActivity.this, "Ошибка TicketsModel", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void getPost() {
+        post = new ArrayList<>();
+        //Response response = HttpApiClient.getApi().getData("bash", 50).execute();
+        UmoriliApi service = HttpApiClient.getExApi();
+        Call<List<PostModel>> call = service.getData("bash", 50);
+
+        call.enqueue(new Callback<List<PostModel>>() {
+            @Override
+            public void onResponse(Call<List<PostModel>> call, Response<List<PostModel>> response) {
+                //Данные успешно пришли, но надо проверить response.body() на null
+                post.addAll(response.body());
+                String p = post.get(1).getLink();
+                Toast.makeText(DrawerActivity.this, p, Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onFailure(Call<List<PostModel>> call, Throwable t) {
+                Toast.makeText(DrawerActivity.this, "Ошибка Post", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
